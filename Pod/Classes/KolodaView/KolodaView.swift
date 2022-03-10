@@ -553,8 +553,9 @@ open class KolodaView: UIView, DraggableCardDelegate {
         }
     }
     
-    private func loadMissingCards(_ missingCardsCount: Int) {
-        guard missingCardsCount > 0 else { return }
+    @discardableResult
+    private func loadMissingCards(_ missingCardsCount: Int) -> Bool {
+        guard missingCardsCount > 0 else { return false }
         
         let cardsToAdd = min(missingCardsCount, countOfCards - currentCardIndex)
         let startIndex = visibleCards.count
@@ -573,6 +574,8 @@ open class KolodaView: UIView, DraggableCardDelegate {
                 insertSubview(nextCardView, at: 0)
             }
         }
+        
+        return true
     }
     
     public func reconfigureCards() {
@@ -593,12 +596,13 @@ open class KolodaView: UIView, DraggableCardDelegate {
     
     // MARK: Public
     
-    public func reloadData() {
+    @discardableResult
+    public func reloadData() -> Bool {
         guard let numberOfCards = dataSource?.kolodaNumberOfCards(self), numberOfCards > 0 else {
             countOfCards = 0
             clear()
             
-            return
+            return false
         }
         
         if currentCardIndex == 0 {
@@ -609,7 +613,7 @@ open class KolodaView: UIView, DraggableCardDelegate {
         if countOfCards - (currentCardIndex + visibleCards.count) > 0 {
             if !visibleCards.isEmpty {
                 let missingCards = missingCardsCount()
-                loadMissingCards(missingCards)
+                return loadMissingCards(missingCards)
             } else {
                 setupDeck()
                 layoutDeck()
@@ -618,6 +622,7 @@ open class KolodaView: UIView, DraggableCardDelegate {
         } else {
             reconfigureCards()
         }
+        return true
     }
     
     public func swipe(_ direction: SwipeResultDirection, force: Bool = false) {
